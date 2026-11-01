@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cone Lab</title>
+  </head>
+  <body>
+    <main class="lab">
+      <section class="bench">
+        <div id="app"></div>
+        <div class="formulaBar" id="formulaBar" hidden></div>
+        <p class="note" id="note" hidden></p>
+        <div class="views" id="views"></div>
+        <div class="ctrl">
+          <label>Fold <input type="range" id="fold" min="0" max="1" step="0.01" /><output id="foldOut"></output></label>
+          <label>Angle θ <input type="range" id="angle" min="60" max="330" step="6" /><output id="angleOut"></output></label>
+          <label>Card R <input type="range" id="R" min="6" max="14" step="1" /><output id="ROut"></output></label>
+        </div>
+        <ol class="steps" id="steps"></ol>
+      </section>
+      <aside class="rail">
+        <div class="lesson" id="lesson"></div>
+        <div class="tutor">
+          <div class="log" id="log" aria-live="polite"></div>
+          <form id="ask"><input id="q" autocomplete="off" placeholder="Ask anything about this cone…" /><button>Ask</button></form>
+          <p class="meter" id="meter"></p>
+        </div>
+      </aside>
+    </main>
+    <script type="module" src="/src/stage/main.js"></script>
+  </body>
+</html>

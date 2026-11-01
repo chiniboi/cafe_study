@@ -1,0 +1,502 @@
+<title>Paper Solids</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a drawing bench on the left that never scrolls away, the lesson card on the right. */
+:root{
+  --paper:#F4F5F3; --surface:#FFFFFF; --sunk:#EAECE9; --ink:#16191C; --ink-mid:#4A5057; --ink-soft:#6B7278;
+  --line:#D8DBD7; --teal:#155E63; --teal-soft:#DCEAEA; --amber:#8F5306; --amber-soft:#F7EBD7;
+  --moss:#33582F; --moss-soft:#E1EBDD; --glow-amber:#F2A93B; --glow-teal:#49B5B0; --glow-moss:#7DB86B;
+  --sans:'IBM Plex Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'Fraunces',ui-serif,Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1315; --surface:#171D1F; --sunk:#131819; --ink:#E7EAE8; --ink-mid:#A9B2B1; --ink-soft:#828C8C;
+  --line:#2A3335; --teal:#67B8BE; --teal-soft:#15292B; --amber:#E0A63F; --amber-soft:#2A2113;
+  --moss:#8FBE84; --moss-soft:#1A2418; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1315; --surface:#171D1F; --sunk:#131819; --ink:#E7EAE8; --ink-mid:#A9B2B1; --ink-soft:#828C8C;
+  --line:#2A3335; --teal:#67B8BE; --teal-soft:#15292B; --amber:#E0A63F; --amber-soft:#2A2113;
+  --moss:#8FBE84; --moss-soft:#1A2418; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--sans);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px}
+.shell{max-width:1240px;margin:0 auto;display:grid;gap:12px;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto minmax(0,1fr);height:calc(100vh - 28px);min-height:560px}
+header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+h1{font:600 22px/1.1 var(--serif);margin:0}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.tab{background:none;border:1px solid var(--line);border-radius:6px;padding:5px 12px;font-size:14px;color:var(--ink-mid)}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.bench{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px}
+.stage{position:relative;flex:1;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;touch-action:none;cursor:grab}
+.stage:active{cursor:grabbing}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ink{pointer-events:none}
+.views{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.views button{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:2px 8px;font-size:12px;color:var(--ink-mid)}
+#tutorLine{position:absolute;left:10px;bottom:8px;right:10px;font:400 12px/1.3 var(--mono);color:var(--ink-soft);pointer-events:none;overflow-wrap:anywhere}
+.controls{display:grid;gap:6px 14px;grid-template-columns:auto minmax(0,1fr);align-items:center}
+.btn{background:var(--teal);color:var(--surface);border:0;border-radius:6px;padding:6px 14px;font-weight:500;min-width:72px}
+.slider{display:grid;grid-template-columns:96px minmax(0,1fr) 62px;align-items:center;gap:8px;font-size:13px;color:var(--ink-mid);grid-column:1/-1}
+.slider output{font:500 13px var(--mono);text-align:right;color:var(--ink)}
+.main-s{grid-column:auto;grid-template-columns:minmax(0,1fr) 44px}
+input[type=range]{width:100%;accent-color:var(--teal);min-width:0}
+aside{min-height:0;min-width:0;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+h2{font:600 22px/1.2 var(--serif);margin:0;text-wrap:balance}
+p{margin:0}
+.lbl{display:block;font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px}
+.q{font-weight:600;margin-bottom:8px}
+.opt{display:block;width:100%;text-align:left;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:7px 11px;margin-top:6px}
+.opt.right{background:var(--moss-soft);border-color:var(--moss)}
+.opt.wrong{background:var(--amber-soft);border-color:var(--amber)}
+.formula{background:var(--teal-soft);border-radius:6px;padding:9px 12px;font:500 15px/1.5 var(--mono);color:var(--teal);overflow-wrap:anywhere}
+.nums{font:400 13.5px/1.6 var(--mono);color:var(--ink-mid);white-space:pre-wrap;overflow-wrap:anywhere}
+.bar{display:flex;height:16px;border-radius:4px;overflow:hidden;background:var(--sunk);margin-top:6px}
+.bar i{display:block;height:100%}
+.eg{border-top:1px solid var(--line);padding-top:12px}
+.eg button{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:13px;margin-top:8px;color:var(--teal)}
+@media (max-width:860px){
+  .shell{display:flex;flex-direction:column;height:auto}
+  .bench{height:auto}.stage{flex:none;height:62vh;min-height:320px}
+  aside{overflow:visible}
+}
+</style>
+
+<div class="shell">
+  <header>
+    <h1>Paper Solids</h1>
+    <nav id="tabs" role="tablist" aria-label="Concepts"></nav>
+  </header>
+  <section class="bench" aria-label="3D drawing">
+    <div class="stage" id="stage">
+      <canvas id="gl" aria-label="A 3D ink drawing of the current solid"></canvas>
+      <canvas id="ink" aria-hidden="true"></canvas>
+      <div class="views" id="views"></div>
+      <div id="tutorLine"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="play">Play</button>
+      <label class="slider main-s"><input type="range" id="progress" min="0" max="1" step="0.001" aria-label="Animation progress"><output id="progressOut"></output></label>
+      <div id="sliders" style="display:contents"></div>
+    </div>
+  </section>
+  <aside id="card" aria-live="polite"></aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+const $ = (s) => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = (x) => x * x * (3 - 2 * x);
+const PI22 = 22 / 7;
+const fmt = (x, d = 1) => { const r = Number(x.toFixed(d)); return String(r); };
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- concepts: every bit of content and every number the scene shows ---------- */
+const CONCEPTS = {
+  unroll: {
+    tab: 'Unroll a cylinder', verb: 'Unrolled', parts: ['rim', 'height', 'radius', 'lids'],
+    values: { r: [7, 3, 9, 1, 'Radius r', 'cm'], h: [10, 4, 14, 1, 'Height h', 'cm'] },
+    title: 'The label on a paint tin',
+    scene: 'You are printing a paper label that wraps once around a tin of radius 7 cm and height 10 cm. The printer needs the width of the flat label.',
+    q: 'How wide is the label when it lies flat?',
+    options: [['a', '14 cm, the width of the tin'], ['b', '44 cm'], ['c', '22 cm']], answer: 'b',
+    why: 'Unroll it and the rim of the tin straightens into the long edge of the label, so the width is the whole way around: 2 × 22/7 × 7 = 44 cm. George measured straight across the tin, but the label has to travel around it.',
+    formula: 'CSA = 2πrh\nTSA = 2πr(r + h)',
+    remember: 'A curved wall is a rectangle that has been rolled up.',
+    eg: { label: 'Try it', text: 'The label is 44 cm by 10 cm, so it covers 440 cm². Add the two lids, 154 cm² each, and the whole tin is 748 cm².', set: { r: 7, h: 10 }, button: 'Show these numbers' },
+  },
+  fold: {
+    tab: 'Fold a sector', verb: 'Folded', parts: ['arc', 'slant', 'apex', 'height', 'radius'],
+    values: { R: [10, 6, 14, 1, 'Paper radius R', 'cm'], angle: [216, 90, 300, 6, 'Sector angle θ', '°'] },
+    title: 'A party hat from a card circle',
+    scene: 'Kramer wants party hats. He cuts a 216° sector from a circle of card with radius 10 cm, then joins the two straight edges.',
+    q: 'What is the radius of the hat’s base?',
+    options: [['a', '10 cm, the same as the card'], ['b', '8 cm'], ['c', '6 cm']], answer: 'c',
+    why: 'The curved edge of the card becomes the rim of the hat, and it keeps its length. So 2πr equals 216/360 of 2π × 10, which gives r = 6 cm. The 10 cm did not vanish: it became the slant, and 8 cm is the height. George used the card’s radius, but that edge now runs up the side.',
+    formula: 'slant l = R\nr = R × θ/360\nh = √(l² − r²)',
+    remember: 'The centre becomes the tip, the radius becomes the slant, and the arc becomes the rim.',
+    eg: { label: 'Example 15', text: 'Join the two radii of a semicircle of radius 14 cm. Then l = 14 and r = 14 × 180/360 = 7, so h = √(196 − 49) = 7√3. The volume is ⅓ × π × 49 × 7√3, which is (343√3/3)π, or about 622 cm³.', set: { R: 14, angle: 180 }, button: 'Fold this one' },
+  },
+  slice: {
+    tab: 'Slice a cone', verb: 'Lifted', parts: ['cut', 'tip', 'frustum', 'height'],
+    values: { k: [0.5, 0.2, 0.8, 0.05, 'Cut height h/H', ''] },
+    title: 'The last bite of an ice cream cone',
+    scene: 'A cone is sliced parallel to its base, exactly halfway up. Lift the small tip off and compare it with the whole cone.',
+    q: 'What fraction of the volume is in the tip?',
+    options: [['a', '1/2, because it is half the height'], ['b', '1/4'], ['c', '1/8']], answer: 'c',
+    why: 'The tip is a smaller copy of the whole cone, so it is half as wide, half as deep and half as tall. That gives ½ × ½ × ½ = 1/8. George halved the height and stopped, but volume shrinks in all three directions at once. The piece left behind is called a frustum, and it holds the other 7/8.',
+    formula: 'tip / whole = (h/H)³\nfrustum = whole − tip',
+    remember: 'Scale the height by k and the volume by k³.',
+    eg: { label: 'Example 13', text: 'A child eats a cone 8 cm tall from the top and leaves 12.5%, which is 1/8. The cube root of 1/8 is 1/2, so the piece left is 8 × 1/2 = 4 cm tall, which is option 4.', set: { k: 0.5 }, button: 'Show this cut' },
+  },
+};
+const state = { concept: 'unroll', t: 0, playing: false, from: 0, to: 1, start: 0, secs: 2.6, hl: null, hlUntil: 0,
+  answered: {}, vals: {}, tutor: '' };
+for (const [id, c] of Object.entries(CONCEPTS)) { state.vals[id] = {}; for (const [k, v] of Object.entries(c.values)) state.vals[id][k] = v[0]; }
+
+/* ---------- renderer and the ink shader, written for this page ---------- */
+const stage = $('#stage'), glCanvas = $('#gl'), inkCanvas = $('#ink'), ctx = inkCanvas.getContext('2d');
+const renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: true, alpha: true });
+const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+const orbit = { az: 0.55, el: 0.5, azGoal: 0.55, elGoal: 0.5, dist: 9, y: 1 };
+const LIGHT = new THREE.Vector3(-0.5, 1, 0.65).normalize();
+const uniforms = { uPaper: { value: new THREE.Color() }, uInk: { value: new THREE.Color() }, uLight: { value: LIGHT }, uTime: { value: 0 } };
+const vs = `attribute float aHeat; attribute vec2 aUv; varying vec3 vN; varying float vHeat; varying vec2 vUv;
+void main(){ vN = normal; vHeat = aHeat; vUv = aUv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`;
+const fs = `uniform vec3 uPaper; uniform vec3 uInk; uniform vec3 uGlow; uniform vec3 uLight; uniform float uTime;
+varying vec3 vN; varying float vHeat; varying vec2 vUv;
+float rule(float x, float w){ float d = abs(fract(x) - 0.5); float a = fwidth(x) * 1.2; return 1.0 - smoothstep(w, w + a, d); }
+float wob(vec2 p){ return sin(p.x * 3.1 + sin(p.y * 2.3)) * 0.12 + sin(p.y * 4.7 + p.x) * 0.08; }
+void main(){
+  vec3 n = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);
+  float lit = dot(n, uLight) * 0.5 + 0.5;
+  float tone = 1.0 - lit;
+  vec2 p = vUv * 46.0;
+  float a = rule(p.x + p.y * 0.35 + wob(vUv * 9.0) * 0.6, 0.1) * smoothstep(0.26, 0.42, tone);
+  float b = rule(p.y - p.x * 0.3 + wob(vUv.yx * 11.0) * 0.6, 0.09) * smoothstep(0.46, 0.62, tone);
+  vec3 base = mix(uPaper, uPaper * 0.965, smoothstep(0.1, 0.6, tone));
+  base = mix(base, uGlow, clamp(vHeat, 0.0, 1.0) * 0.72);
+  gl_FragColor = vec4(mix(base, uInk, max(a, b) * 0.62), 1.0);
+}`;
+const shadowVs = `uniform vec3 uLight; void main(){ vec3 p = position; float s = max(p.y, 0.0) / uLight.y; p.xz -= uLight.xz * s; p.y = -0.012;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0); }`;
+const shadowFs = `uniform vec3 uInk; void main(){ float x = (gl_FragCoord.x + gl_FragCoord.y) * 0.125; float d = abs(fract(x) - 0.5);
+  gl_FragColor = vec4(uInk, (1.0 - smoothstep(0.1, 0.24, d)) * 0.17); }`;
+
+class Sheet {
+  constructor(nu, nv, { flip = 1, glow = '--glow-amber', edges = [] } = {}) {
+    Object.assign(this, { nu, nv, flip, edges, visible: true, fn: null });
+    const n = (nu + 1) * (nv + 1), idx = [];
+    this.pos = new Float32Array(n * 3); this.heat = new Float32Array(n); this.uv = new Float32Array(n * 2);
+    for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) {
+      const a = this.at(i, j), b = this.at(i + 1, j), c = this.at(i, j + 1), d = this.at(i + 1, j + 1);
+      idx.push(a, b, d, a, d, c);
+    }
+    const g = this.geo = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('aHeat', new THREE.BufferAttribute(this.heat, 1).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('aUv', new THREE.BufferAttribute(this.uv, 2).setUsage(THREE.DynamicDrawUsage));
+    g.setIndex(idx);
+    this.glowVar = glow;
+    this.mat = new THREE.ShaderMaterial({ vertexShader: vs, fragmentShader: fs, side: THREE.DoubleSide, extensions: { derivatives: true },
+      uniforms: { ...uniforms, uGlow: { value: new THREE.Color() } } });
+    this.mesh = new THREE.Mesh(g, this.mat); this.mesh.frustumCulled = false;
+    this.shadow = new THREE.Mesh(g, new THREE.ShaderMaterial({ vertexShader: shadowVs, fragmentShader: shadowFs, uniforms, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
+    this.shadow.frustumCulled = false;
+    scene.add(this.mesh, this.shadow);
+  }
+  at(i, j) { return j * (this.nu + 1) + i; }
+  show(v) { this.visible = v; this.mesh.visible = v; this.shadow.visible = v; }
+  update(fn) {
+    const o = { x: 0, y: 0, z: 0, heat: 0, a: 0, b: 0 };
+    for (let j = 0; j <= this.nv; j++) for (let i = 0; i <= this.nu; i++) {
+      const k = this.at(i, j); o.heat = 0; fn(i / this.nu, j / this.nv, o);
+      this.pos[k * 3] = o.x; this.pos[k * 3 + 1] = o.y; this.pos[k * 3 + 2] = o.z;
+      this.heat[k] = o.heat; this.uv[k * 2] = o.a; this.uv[k * 2 + 1] = o.b;
+    }
+    const g = this.geo; g.attributes.position.needsUpdate = g.attributes.aHeat.needsUpdate = g.attributes.aUv.needsUpdate = true;
+    g.computeVertexNormals();
+  }
+  p(i, j) { const k = this.at(i, j) * 3; return [this.pos[k], this.pos[k + 1], this.pos[k + 2]]; }
+  facing(i, j, cam) {          // +1 when the outside of quad (i, j) faces the camera
+    const a = this.p(i, j), b = this.p(i + 1, j), c = this.p(i, j + 1);
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const m = Math.hypot(...n);
+    if (m < 1e-9) return 0;
+    return Math.sign(n[0] * (cam.x - a[0]) + n[1] * (cam.y - a[1]) + n[2] * (cam.z - a[2])) * this.flip;
+  }
+}
+const lid = (glow) => new Sheet(3, 40, { glow, edges: [{ side: 'u1', hide: false }] });
+const sheets = {
+  wall: new Sheet(72, 8, { flip: 1, edges: [{ side: 'v0', hide: true, key: 'rim' }, { side: 'v1', hide: false }, { side: 'u0', hide: true }, { side: 'u1', hide: true }] }),
+  lidTop: lid('--glow-teal'), lidBottom: lid('--glow-teal'),
+  sector: new Sheet(14, 72, { flip: -1, edges: [{ side: 'u1', hide: true, key: 'arc' }, { side: 'v0', hide: true, key: 'slant' }, { side: 'v1', hide: true }] }),
+  frustum: new Sheet(64, 6, { flip: -1, glow: '--glow-teal', edges: [{ side: 'v0', hide: true }, { side: 'v1', hide: false, key: 'cut' }] }),
+  frustumLid: lid('--glow-amber'),
+  tip: new Sheet(64, 8, { flip: -1, glow: '--glow-moss', edges: [{ side: 'v0', hide: true }] }),
+  tipLid: lid('--glow-amber'),
+};
+const USES = { unroll: ['wall', 'lidTop', 'lidBottom'], fold: ['sector'], slice: ['frustum', 'frustumLid', 'tip', 'tipLid'] };
+const disc = (o, c, e1, e2, rad, u, v, heat) => {
+  const ang = v * Math.PI * 2, s = u * rad;
+  o.x = c[0] + s * (Math.cos(ang) * e1[0] + Math.sin(ang) * e2[0]);
+  o.y = c[1] + s * (Math.cos(ang) * e1[1] + Math.sin(ang) * e2[1]);
+  o.z = c[2] + s * (Math.cos(ang) * e1[2] + Math.sin(ang) * e2[2]);
+  o.a = o.x * 0.2; o.b = o.z * 0.2 + o.y * 0.2; o.heat = heat;
+};
+
+/* the shape of each concept at progress t; pts holds the 3D anchors the ink layer labels */
+let pts = {};
+const hot = (name) => (state.hl === name && performance.now() < state.hlUntil ? 0.5 + 0.5 * Math.sin(performance.now() / 130) : 0);
+const SHAPES = {
+  unroll(t) {
+    const { r: rc, h: hc } = state.vals.unroll, r = rc / 7, h = hc / 7, e = clamp(t), rho = r / Math.max(1 - e, 1e-4), lift = r * smooth(clamp(e * 1.4 - 0.2));
+    const hRim = hot('rim'), hH = hot('height'), hLid = hot('lids');
+    sheets.wall.update((u, v, o) => {
+      const s = (u - 0.5) * 2 * Math.PI * r, th = s / rho;
+      o.x = rho * Math.sin(th); o.z = r - rho + rho * Math.cos(th); o.y = v * h + lift;
+      o.a = s * 0.33; o.b = v * h * 0.33;
+      o.heat = Math.max(Math.pow(1 - v, 9) * (0.55 + e * 0.45) * 0.95, hRim * Math.pow(1 - v, 3), hH * 0.5);
+    });
+    const a = smooth(clamp(e * 1.4 - 0.2)) * Math.PI / 2, d = [0, Math.sin(a), -Math.cos(a)], e1 = [1, 0, 0];
+    const top = [0, h + lift + r * Math.sin(a), r - r * Math.cos(a)], bot = [0, lift - r * Math.sin(a), r - r * Math.cos(a)];
+    sheets.lidTop.update((u, v, o) => disc(o, top, e1, d, r, u, v, hLid * 0.8));
+    sheets.lidBottom.update((u, v, o) => disc(o, bot, e1, [0, -d[1], d[2]], r, u, v, hLid * 0.8));
+    const w = sheets.wall;
+    pts = { rimMid: w.p(36, 0), rimEnd: w.p(0, 0), hA: w.p(60, 0), hB: w.p(60, 8), top, bot, r, e, topEdge: [top[0] + r, top[1], top[2]] };
+    orbit.y = (h + lift * 2) / 2; orbit.dist = 8.2 + Math.max(h, r * 2) * 0.8 + e * r * 3.6;
+  },
+  fold(t) {
+    const { R: rc, angle } = state.vals.fold, R = rc / 5, frac = angle / 360, s = 1 + (frac - 1) * smooth(clamp(t));
+    const cosB = Math.sqrt(1 - s * s), span = Math.PI * 2 * frac, hA = hot('arc'), hS = hot('slant');
+    sheets.sector.update((u, v, o) => {
+      const rho = u * R, al = (v - 0.5) * span, ph = al / s + Math.PI / 2;
+      o.x = rho * s * Math.cos(ph); o.z = rho * s * Math.sin(ph); o.y = (R - rho) * cosB;
+      o.a = rho * Math.cos(al) * 0.4; o.b = rho * Math.sin(al) * 0.4;
+      o.heat = Math.max(Math.pow(u, 16) * 0.95, hA * Math.pow(u, 5), hS * Math.max(Math.pow(Math.abs(v - 0.5) * 2, 18), 0));
+    });
+    pts = { apex: [0, R * cosB, 0], arcMid: sheets.sector.p(14, 36), slantMid: sheets.sector.p(7, 0), R, s, cosB, base: R * s, centre: [0, 0, 0] };
+    orbit.y = 0.85; orbit.dist = 7 + R * 2.2;
+  },
+  slice(t) {
+    const k = state.vals.slice.k, H = 3.2, R = 1.6, cutY = H * (1 - k), rCut = R * k, lift = smooth(clamp(t)) * 1.5;
+    const hTip = hot('tip'), hF = hot('frustum'), hC = hot('cut');
+    const side = (o, ang, y, rad, sl) => { o.x = rad * Math.cos(ang); o.z = rad * Math.sin(ang); o.y = y; o.a = ang * 0.75; o.b = sl * 0.42; };
+    sheets.frustum.update((u, v, o) => { const y = v * cutY, rad = R * (1 - y / H); side(o, u * Math.PI * 2, y, rad, y); o.heat = Math.max(0.34, hF * 0.9); });
+    sheets.tip.update((u, v, o) => { const y = cutY + v * (H - cutY - 0.0001), rad = R * (1 - y / H); side(o, u * Math.PI * 2, y + lift, Math.max(rad, 1e-4), y); o.heat = Math.max(0.48, hTip * 0.9); });
+    const X = [1, 0, 0], Z = [0, 0, 1];
+    sheets.frustumLid.update((u, v, o) => disc(o, [0, cutY, 0], X, Z, rCut, u, v, Math.max(0.65, hC)));
+    sheets.tipLid.update((u, v, o) => disc(o, [0, cutY + lift + 0.002, 0], X, Z, rCut, u, v, Math.max(0.65, hC)));
+    pts = { cutY, rCut, lift, H, R, apex: [0, H + lift, 0] };
+    orbit.y = (H + lift) / 2; orbit.dist = 12.5;
+  },
+};
+
+/* ---------- ink layer: the outlines and labels, drawn over the WebGL surfaces ---------- */
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+let W = 1, H = 1, palette = {};
+const v3 = new THREE.Vector3();
+const proj = (p) => { v3.set(p[0], p[1], p[2]).project(camera); return [(v3.x + 1) / 2 * W, (1 - v3.y) / 2 * H]; };
+const stroke = (points, { color = palette.ink, w = 1.5, dash = null, alpha = 1 } = {}) => {
+  if (points.length < 2) return;
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = w; ctx.globalAlpha = alpha; ctx.lineCap = ctx.lineJoin = 'round';
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); points.forEach((p, i) => { const q = proj(p); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.stroke(); ctx.restore();
+};
+const label = (p, text, color = palette.ink, dx = 0, dy = 0) => {
+  const q = proj(p); ctx.save(); ctx.font = 'italic 600 16px Fraunces, Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 5; ctx.strokeStyle = palette.surface; ctx.lineJoin = 'round';
+  const x = clamp(q[0] + dx, 48, W - 48), y = clamp(q[1] + dy, 14, H - 26);
+  ctx.strokeText(text, x, y); ctx.fillStyle = color; ctx.fillText(text, x, y); ctx.restore();
+};
+const dot = (p, color) => { const q = proj(p); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(q[0], q[1], 3.2, 0, 7); ctx.fill(); };
+function drawSheet(s) {
+  if (!s.visible) return;
+  const cam = camera.position, { nu, nv } = s;
+  const f = new Int8Array(nu * nv);
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) f[j * nu + i] = s.facing(i, j, cam);
+  ctx.save(); ctx.strokeStyle = palette.ink; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.beginPath();
+  const seg = (a, b) => { const p = proj(a), q = proj(b); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu - 1; i++) { const a = f[j * nu + i], b = f[j * nu + i + 1]; if (a && b && a !== b) seg(s.p(i + 1, j), s.p(i + 1, j + 1)); }
+  for (let j = 0; j < nv - 1; j++) for (let i = 0; i < nu; i++) { const a = f[j * nu + i], b = f[(j + 1) * nu + i]; if (a && b && a !== b) seg(s.p(i, j + 1), s.p(i + 1, j + 1)); }
+  ctx.stroke(); ctx.restore();
+  for (const e of s.edges) {
+    const pts2 = [], faces = [], ver = e.side[0] === 'v', fixed = e.side[1] === '1', n = ver ? nu : nv;
+    for (let m = 0; m <= n; m++) { pts2.push(ver ? s.p(m, fixed ? nv : 0) : s.p(fixed ? nu : 0, m));
+      if (m < n) faces.push(ver ? f[(fixed ? nv - 1 : 0) * nu + m] : f[m * nu + (fixed ? nu - 1 : 0)]); }
+    const accent = e.key === 'rim' || e.key === 'arc' ? palette.amber : e.key === 'slant' ? palette.teal : e.key === 'cut' ? palette.amber : palette.ink;
+    const w = accent === palette.ink ? 1.7 : 2.6;
+    if (!e.hide) { stroke(pts2, { color: accent, w }); continue; }
+    let run = [pts2[0]], hid = faces[0] < 0;
+    for (let m = 1; m < pts2.length; m++) {
+      const nowHid = m < faces.length ? faces[m] < 0 : hid; run.push(pts2[m]);
+      if (nowHid !== hid || m === pts2.length - 1) { stroke(run, hid ? { color: accent, w: 1, dash: [3, 5], alpha: 0.55 } : { color: accent, w }); run = [pts2[m]]; hid = nowHid; }
+    }
+  }
+}
+const OVERLAYS = {
+  unroll() {
+    const { r, h } = state.vals.unroll, seen = state.answered.unroll, width = 2 * PI22 * r;
+    if (pts.e > 0.55) label(pts.rimMid, seen ? `2πr = ${fmt(width)} cm` : '2πr = ?', palette.amber, 0, -18);
+    else label(pts.rimMid, 'the rim', palette.amber, 0, -18);
+    stroke([pts.hA, pts.hB], { color: hot('height') ? palette.amber : palette.ink, w: 2 });
+    label([(pts.hA[0] + pts.hB[0]) / 2, (pts.hA[1] + pts.hB[1]) / 2, pts.hA[2]], `h = ${h} cm`, palette.ink, 42);
+    stroke([pts.top, pts.topEdge], { color: palette.teal, w: 2 });
+    label(pts.topEdge, `r = ${r} cm`, palette.teal, 34, -14);
+  },
+  fold() {
+    const { R, angle } = state.vals.fold, seen = state.answered.fold, f = angle / 360, r = R * f, hh = Math.sqrt(R * R - r * r), circle = [];
+    for (let i = 0; i <= 72; i++) { const a = i / 72 * Math.PI * 2; circle.push([pts.R * Math.cos(a), 0, pts.R * Math.sin(a)]); }
+    if (state.t < 0.98) stroke(circle, { w: 1, dash: [4, 6], alpha: 0.4 * (1 - state.t) });
+    dot(pts.apex, palette.ink);
+    label(pts.apex, state.t < 0.5 ? 'centre' : 'tip', palette.ink, 0, -16);
+    label(pts.slantMid, state.t < 0.5 ? `R = ${R} cm` : `l = R = ${R} cm`, palette.teal, -48, -8);
+    label(pts.arcMid, state.t < 0.5 ? 'the arc' : 'arc becomes the rim', palette.amber, 0, 24);
+    if (state.t > 0.85) {
+      stroke([pts.centre, [pts.base * 0.999, 0, 0]], { color: palette.moss, w: 2 });
+      label([pts.base * 0.5, 0, 0], seen ? `r = ${fmt(r)} cm` : 'r = ?', palette.moss, 0, 16);
+      stroke([pts.centre, pts.apex], { color: palette.ink, w: 1.2, dash: [4, 4], alpha: 0.7 });
+      if (seen) label([0, pts.apex[1] * 0.45, 0], `h = ${fmt(hh)} cm`, palette.ink, 46);
+    }
+  },
+  slice() {
+    const k = state.vals.slice.k, seen = state.answered.slice, c = pts.cutY + pts.lift, frust = [pts.rCut, pts.cutY, 0];
+    label([0, c + (pts.H - pts.cutY) * 0.45, 0], seen ? `tip: ${fmt(k ** 3 * 100)}%` : 'tip: ?', palette.moss, 62, -6);
+    label([pts.R * 0.72, pts.cutY * 0.45, 0], 'frustum', palette.teal, 56);
+    label(frust, `cut at ${fmt(k * 100, 0)}% of the height`, palette.amber, 0, 20);
+    dot(pts.apex, palette.ink);
+  },
+};
+
+/* ---------- the shared controls: clicks and the tutor both go through COMMANDS ---------- */
+const describe = () => {
+  const c = CONCEPTS[state.concept], vals = Object.entries(state.vals[state.concept]).map(([k, v]) => `${k}=${v}`).join(', ');
+  return `Showing "${c.title}" (${state.concept}). ${c.verb} ${Math.round(state.t * 100)}%. Values: ${vals}. `
+    + `Answer ${state.answered[state.concept] ? 'revealed' : 'not revealed yet: do not give it away'}. Parts you can highlight: ${c.parts.join(', ')}.`;
+};
+const COMMANDS = {
+  open_concept({ concept }) {
+    if (!CONCEPTS[concept]) return `No concept called ${concept}. Choose from ${Object.keys(CONCEPTS).join(', ')}.`;
+    state.concept = concept; state.t = 0; state.playing = false; state.hl = null;
+    for (const [n, s] of Object.entries(sheets)) s.show(USES[concept].includes(n));
+    renderLesson(); return describe();
+  },
+  play_animation({ to = 1, seconds = 2.6 } = {}) {
+    state.to = clamp(Number(to)); state.from = state.t; state.secs = clamp(Number(seconds) || 2.6, 0.3, 20);
+    if (Math.abs(state.to - state.t) < 0.005) { state.from = state.to > 0.5 ? 0 : 1; state.t = state.from; }
+    if (reduced) { state.t = state.to; state.playing = false; } else { state.start = performance.now(); state.playing = true; }
+    return `Animating to ${Math.round(state.to * 100)}% over ${state.secs} seconds.`;
+  },
+  pause_animation() { state.playing = false; return `Paused at ${Math.round(state.t * 100)}%.`; },
+  set_progress({ value }) { state.playing = false; state.t = clamp(Number(value) || 0); return `Now ${Math.round(state.t * 100)}% of the way.`; },
+  set_value({ name, value }) {
+    const spec = CONCEPTS[state.concept].values[name];
+    if (!spec) return `This concept has no ${name}. It has ${Object.keys(CONCEPTS[state.concept].values).join(', ')}.`;
+    const v = clamp(Number(value), spec[1], spec[2]); state.vals[state.concept][name] = v; syncControls();
+    return `${name} is now ${v}${v !== Number(value) ? ` (the nearest allowed; range ${spec[1]} to ${spec[2]})` : ''}.`;
+  },
+  highlight({ part, seconds = 3 }) {
+    if (!CONCEPTS[state.concept].parts.includes(part)) return `No part called ${part} here. Parts: ${CONCEPTS[state.concept].parts.join(', ')}.`;
+    state.hl = part; state.hlUntil = performance.now() + clamp(Number(seconds) || 3, 0.5, 10) * 1000; return `The ${part} is glowing now.`;
+  },
+  look_from({ view }) {
+    const v = VIEWS[view]; if (!v) return `No view called ${view}. Choose from ${Object.keys(VIEWS).join(', ')}.`;
+    orbit.azGoal = v[0]; orbit.elGoal = v[1]; return `Looking from ${view}.`;
+  },
+  show_answer() { answer(CONCEPTS[state.concept].answer, true); return 'The answer and its explanation are on the card now.'; },
+  get_state() { return describe(); },
+};
+const TOOLS = [
+  { name: 'open_concept', description: 'Switch the 3D scene to a concept and reset it.', parameters: { type: 'OBJECT', properties: { concept: { type: 'STRING', enum: Object.keys(CONCEPTS) } }, required: ['concept'] } },
+  { name: 'play_animation', description: 'Animate the shape to a progress from 0 (start) to 1 (end). Use a long time to narrate along with it.', parameters: { type: 'OBJECT', properties: { to: { type: 'NUMBER' }, seconds: { type: 'NUMBER' } } } },
+  { name: 'pause_animation', description: 'Stop the animation where it is.', parameters: { type: 'OBJECT', properties: {} } },
+  { name: 'set_progress', description: 'Jump to a progress from 0 to 1.', parameters: { type: 'OBJECT', properties: { value: { type: 'NUMBER' } }, required: ['value'] } },
+  { name: 'set_value', description: 'Change a number in the scene: r or h (cm) for unroll, R (cm) or angle (degrees) for fold, k (cut height as a fraction) for slice.', parameters: { type: 'OBJECT', properties: { name: { type: 'STRING' }, value: { type: 'NUMBER' } }, required: ['name', 'value'] } },
+  { name: 'highlight', description: 'Make a named part glow for a few seconds. Parts: rim, height, radius, lids (unroll); arc, slant, apex, height, radius (fold); cut, tip, frustum, height (slice).', parameters: { type: 'OBJECT', properties: { part: { type: 'STRING' }, seconds: { type: 'NUMBER' } }, required: ['part'] } },
+  { name: 'look_from', description: 'Move the camera.', parameters: { type: 'OBJECT', properties: { view: { type: 'STRING', enum: ['angle', 'front', 'above', 'side'] } }, required: ['view'] } },
+  { name: 'show_answer', description: 'Reveal the answer to the question. Only after the student has tried or asks for it.', parameters: { type: 'OBJECT', properties: {} } },
+  { name: 'get_state', description: 'Read what the student sees right now.', parameters: { type: 'OBJECT', properties: {} } },
+];
+const run = (name, args = {}, who = 'tutor') => {
+  if (!COMMANDS[name]) return `No command called ${name}.`;
+  const out = COMMANDS[name](args);
+  if (who === 'tutor') $('#tutorLine').textContent = `Tutor: ${name}(${Object.entries(args).map(([k, v]) => `${k}: ${v}`).join(', ')})`;
+  return out;
+};
+window.SceneTutor = { run, tools: TOOLS, state: describe };
+// The parent app drives the scene over postMessage, the same way voice_actions.js drives the app
+addEventListener('message', (e) => {
+  if (e.data?.type !== 'scene-command') return;
+  e.source?.postMessage({ type: 'scene-result', id: e.data.id, output: run(e.data.name, e.data.args) }, '*');
+});
+
+/* ---------- page wiring ---------- */
+const VIEWS = { angle: [0.55, 0.5], front: [0, 0.1], above: [0, 1.35], side: [1.4, 0.2] };
+$('#views').innerHTML = Object.keys(VIEWS).map((v) => `<button data-v="${v}">${v[0].toUpperCase() + v.slice(1)}</button>`).join('');
+$('#views').addEventListener('click', (e) => { if (e.target.dataset.v) run('look_from', { view: e.target.dataset.v }, 'user'); });
+$('#tabs').innerHTML = Object.entries(CONCEPTS).map(([id, c]) => `<button class="tab" role="tab" data-c="${id}">${c.tab}</button>`).join('');
+$('#tabs').addEventListener('click', (e) => { if (e.target.dataset.c) run('open_concept', { concept: e.target.dataset.c }, 'user'); });
+$('#play').addEventListener('click', () => { state.playing ? run('pause_animation', {}, 'user') : run('play_animation', { to: state.t > 0.98 ? 0 : 1 }, 'user'); });
+$('#progress').addEventListener('input', (e) => run('set_progress', { value: e.target.value }, 'user'));
+function syncControls() {
+  const c = CONCEPTS[state.concept];
+  for (const k of Object.keys(c.values)) { const i = document.getElementById(`v-${k}`); if (!i) continue; i.value = state.vals[state.concept][k]; }
+  updateReadout();
+}
+function updateReadout() {
+  const c = CONCEPTS[state.concept];
+  for (const [k, s] of Object.entries(c.values)) { const o = document.getElementById(`o-${k}`); if (o) o.textContent = `${state.vals[state.concept][k]}${s[5] === '°' ? '°' : ''}`; }
+  const seen = state.answered[state.concept], v = state.vals[state.concept]; let t = '', bar = '';
+  if (state.concept === 'unroll') { const w = 2 * PI22 * v.r, lid2 = 2 * PI22 * v.r * v.r; t = seen ? `label  ${fmt(w)} × ${v.h} = ${fmt(w * v.h)} cm²\nlids   ${fmt(lid2)} cm²\ntotal  ${fmt(w * v.h + lid2)} cm²` : 'Answer the question to see the numbers.'; }
+  if (state.concept === 'fold') { const r = v.R * v.angle / 360, h = Math.sqrt(v.R * v.R - r * r); t = seen ? `l = ${v.R} cm\nr = ${v.R} × ${v.angle}/360 = ${fmt(r)} cm\nh = ${fmt(h)} cm\nvolume ≈ ${fmt(Math.PI * r * r * h / 3, 0)} cm³` : 'Answer the question to see the numbers.'; }
+  if (state.concept === 'slice') { const p = v.k ** 3 * 100; t = seen ? `tip      ${fmt(p)}%\nfrustum  ${fmt(100 - p)}%` : 'Answer the question to see the numbers.';
+    bar = seen ? `<div class="bar" role="img" aria-label="Tip ${fmt(p)} percent of the volume"><i style="width:${p}%;background:var(--glow-moss)"></i><i style="width:${100 - p}%;background:var(--glow-teal)"></i></div>` : ''; }
+  const n = $('#nums'); if (n) n.innerHTML = t.replace(/&/g, '&amp;') + bar;
+}
+function answer(o, viaTutor = false) {
+  const c = CONCEPTS[state.concept]; state.answered[state.concept] = true;
+  document.querySelectorAll('.opt').forEach((b) => { b.disabled = true; if (b.dataset.o === c.answer) b.classList.add('right'); else if (b.dataset.o === o && !viaTutor) b.classList.add('wrong'); });
+  $('#why').hidden = false; updateReadout();
+  if (state.t < 0.9) COMMANDS.play_animation({ to: 1 });
+  parent?.postMessage({ type: 'scene-event', event: 'answered', right: o === c.answer, state: describe() }, '*');
+}
+function renderLesson() {
+  const id = state.concept, c = CONCEPTS[id], done = state.answered[id];
+  document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', b.dataset.c === id));
+  $('#sliders').innerHTML = Object.entries(c.values).map(([k, s]) => `<label class="slider">${s[4]}<input type="range" id="v-${k}" min="${s[1]}" max="${s[2]}" step="${s[3]}" value="${state.vals[id][k]}"><output id="o-${k}"></output></label>`).join('');
+  $('#sliders').querySelectorAll('input').forEach((i) => i.addEventListener('input', () => run('set_value', { name: i.id.slice(2), value: i.value }, 'user')));
+  $('#card').innerHTML = `<h2>${c.title}</h2><div><span class="lbl">Scene</span><p>${c.scene}</p></div>
+    <div><span class="lbl">Predict</span><p class="q">${c.q}</p>${c.options.map(([o, t]) => `<button class="opt${done && o === c.answer ? ' right' : ''}" data-o="${o}"${done ? ' disabled' : ''}>${t}</button>`).join('')}</div>
+    <div id="why"${done ? '' : ' hidden'}><span class="lbl">Why</span><p>${c.why}</p></div>
+    <div class="formula" style="white-space:pre-wrap">${c.formula}</div>
+    <div><span class="lbl">Your numbers</span><div class="nums" id="nums"></div></div>
+    <div><span class="lbl">Remember</span><p>${c.remember}</p></div>
+    <div class="eg"><span class="lbl">${c.eg.label}</span><p>${c.eg.text}</p><button id="egBtn">${c.eg.button}</button></div>`;
+  $('#card').querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => answer(b.dataset.o)));
+  $('#egBtn').addEventListener('click', () => { for (const [k, v] of Object.entries(c.eg.set)) run('set_value', { name: k, value: v }, 'user'); run('play_animation', { to: 1 }, 'user'); });
+  $('#card').scrollTop = 0; updateReadout();
+}
+let drag = null;
+stage.addEventListener('pointerdown', (e) => { drag = [e.clientX, e.clientY]; stage.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointermove', (e) => { if (!drag) return; orbit.azGoal -= (e.clientX - drag[0]) * 0.008; orbit.elGoal = clamp(orbit.elGoal + (e.clientY - drag[1]) * 0.006, 0.03, 1.45); drag = [e.clientX, e.clientY]; });
+stage.addEventListener('pointerup', () => { drag = null; });
+function theme() {
+  palette = { ink: css('--ink'), teal: css('--teal'), amber: css('--amber'), moss: css('--moss'), surface: css('--surface') };
+  uniforms.uInk.value.set(palette.ink); uniforms.uPaper.value.set(palette.surface);
+  for (const s of Object.values(sheets)) s.mat.uniforms.uGlow.value.set(css(s.glowVar));
+}
+function resize() {
+  const r = stage.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2); W = r.width; H = r.height;
+  renderer.setPixelRatio(dpr); renderer.setSize(W, H, false); inkCanvas.width = W * dpr; inkCanvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  camera.aspect = W / H; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', theme);
+new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+function frame(now) {
+  if (state.playing) {
+    const p = clamp((now - state.start) / (state.secs * 1000)); state.t = state.from + (state.to - state.from) * p;
+    if (p >= 1) state.playing = false;
+  }
+  $('#progress').value = state.t; $('#progressOut').textContent = `${Math.round(state.t * 100)}%`;
+  $('#play').textContent = state.playing ? 'Pause' : state.t > 0.98 ? 'Replay' : 'Play';
+  SHAPES[state.concept](state.t);
+  orbit.az += (orbit.azGoal - orbit.az) * 0.1; orbit.el += (orbit.elGoal - orbit.el) * 0.1;
+  const d = orbit.dist * Math.max(1, 1.25 / camera.aspect);
+  camera.position.set(d * Math.sin(orbit.az) * Math.cos(orbit.el), orbit.y + d * Math.sin(orbit.el), d * Math.cos(orbit.az) * Math.cos(orbit.el));
+  camera.lookAt(0, orbit.y, 0); camera.updateMatrixWorld();
+  renderer.render(scene, camera);
+  ctx.clearRect(0, 0, W, H);
+  for (const n of USES[state.concept]) drawSheet(sheets[n]);
+  OVERLAYS[state.concept]();
+  requestAnimationFrame(frame);
+}
+theme(); resize(); run('open_concept', { concept: 'unroll' }, 'user'); requestAnimationFrame(frame);
+})();
+</script>
